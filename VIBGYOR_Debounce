@@ -1,0 +1,65 @@
+const int buttonPin = 2;
+int i=1;
+const int redPin = 11;
+const int greenPin = 10;
+const int bluePin = 9;        
+int buttonState;             
+int lastButtonState = LOW;   
+unsigned long lastDebounceTime = 0;  
+unsigned long debounceDelay = 50;    
+
+void setup() {
+  pinMode(buttonPin, INPUT);
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);  
+}
+
+void loop() 
+{
+  int reading = digitalRead(buttonPin);
+  if (reading != lastButtonState)
+  {
+    lastDebounceTime = millis(); // Reset the debouncing timer
+  }
+  if ((millis() - lastDebounceTime) > debounceDelay) // Check if state change has lasted for longer time than debounce delay
+  {
+    if (reading != buttonState) 
+    {
+      buttonState = reading;
+      if (buttonState == HIGH) // Only shift if button is pressed
+      {
+        i++;
+        if (i==8)
+        {
+          i=1;
+        }
+      }
+   }
+ }
+ switch(i)
+        {
+        case 1:setColor(255, 0, 0);  // red
+               break;
+        case 2:setColor(255, 100, 0);  // orange
+               break;
+        case 3:setColor(255,255,0);  // yellow
+               break;
+        case 4:setColor(0, 255, 0);  // green
+               break;
+        case 5:setColor(0,0,255);  // blue
+               break;
+        case 6:setColor(75,0,130);  // indigo
+               break;
+        case 7:setColor(148,0,211);  // violet
+               break;
+       }
+ lastButtonState = reading;
+}
+
+void setColor(int red, int green, int blue) // set RGB colour intensities
+{
+  analogWrite(redPin, red);
+  analogWrite(greenPin, green);
+  analogWrite(bluePin, blue);  
+}
