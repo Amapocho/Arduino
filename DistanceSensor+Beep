@@ -1,7 +1,6 @@
-//***************************************************************
+
 //the pins of 1-digit 7-segment display attached to arduino board digital pins 4 - 11 respectively
 const int dp = 4; 
-const int actuators = 12;
 const int c = 5;
 const int b = 6;
 const int a = 7;
@@ -9,11 +8,11 @@ const int f = 8;
 const int g = 9;
 const int e = 10;
 const int d = 11
+const int actuators = 12;
 int trigPin = 2;    // Trigger
 int echoPin = 3;    // Echo
 int outputVal;
 long duration, cm;
-//***************************************************************
 void setup()
 {
   Serial.begin(9600);//initialize serial communication on 9600 bps
