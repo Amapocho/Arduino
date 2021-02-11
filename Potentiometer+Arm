@@ -1,0 +1,98 @@
+#include <Servo.h>
+#include <LiquidCrystal.h>
+Servo sh,el,claw;
+int pot = 0;
+int valsh,valelb,close=0,dist,val;
+double sho,elbo;
+int b = 8,temp,prev=0;
+char s[3],d[2];
+LiquidCrystal lcd(7,6,5,4,3,2);
+
+void setup() 
+{ 
+  lcd.begin(16, 2);
+  Serial.begin(9600);
+  pinMode(b,INPUT);
+  sh.attach(9);
+  el.attach(10);
+  claw.attach(11);
+  sh.write(0);
+  el.write(0);
+  claw.write(0);
+  lcd.clear();
+  lcd.write("A:   0  B: 180   ");
+  lcd.setCursor(0,1);
+  lcd.write("Dist: 49");
+}
+
+void loop() 
+{
+  val = analogRead(pot);
+  if (val!=prev)
+  {
+  	prev = val;
+  	sho = val * 3.14 / 1024;
+  	elbo = 3.14-asin(0.66*sin(sho))-sho;
+  	dist = 20*cos(sho) - 30*cos(sho + elbo);
+  	Serial.println(dist);
+  	valsh = sho*180/3.14;
+ 	valelb = elbo*180/3.14;
+	lcd.clear();
+	lcd.write("A: ");
+  	temp = valsh/100 + 48;
+  	if (temp == 48)
+    	s[0]=' ';
+  	else
+  		s[0]=(char)temp;
+  	temp = (valsh/10) % 10 + 48;
+  	if (temp == 48 && s[0]==' ')
+    	s[1]=' ';
+  	else
+  		s[1]=(char)temp;
+  	temp = valsh%10 + 48;
+  	s[2]=(char)temp;
+  	lcd.write(s);
+  	lcd.setCursor(6,0);
+  	lcd.write("  ");
+  	lcd.write("B: ");
+  	temp = valelb/100 + 48;
+  	if (temp == 48)
+    	s[0]=' ';
+  	else
+  		s[0]=(char)temp;
+  	temp = (valelb/10) % 10 + 48;
+  	if (temp == 48 && s[0]==' ')
+    	s[1]=' ';
+  	else
+  		s[1]=(char)temp;
+  	temp = valelb%10 + 48;
+  	s[2]=(char)temp;
+  	lcd.write(s);
+  	lcd.setCursor(14,0);
+  	lcd.write("  ");
+  	sh.write(valsh);
+  	el.write(valelb);
+    lcd.setCursor(0,1);
+    lcd.write("Dist: ");
+    temp = (dist/10) + 48;
+  	if (temp == 48)
+    	d[0]=' ';
+  	else
+  		d[0]=(char)temp;
+  	temp = dist%10 + 48;
+  	d[1]=(char)temp;
+  	lcd.write(d);
+  }
+  lcd.setCursor(8,1);
+  if (digitalRead(b))
+  {
+  	lcd.write(" Closed");
+    claw.write(180);
+  }
+  else
+  {
+  	lcd.write(" Open");
+    claw.write(0);
+  }
+  delay(10);                          
+}
