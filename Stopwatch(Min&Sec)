@@ -1,0 +1,130 @@
+#include <LiquidCrystal.h>
+
+// initialize the library by associating any needed LCD interface pin
+// with the arduino pin number it is connected to
+unsigned long lastOut = 0;
+LiquidCrystal lcd(12,11,5,4,8,7);
+const int b1 = 2, b2 = 3;
+int op = 0; //op=0 for 0 state, op=1 for running state, op=2 for paused state
+int m=0,s=0;
+int ct=0;
+int buttonState;             
+int lastButton1State = LOW;
+int lastButton2State = LOW;   
+unsigned long lastDebounceTime = 0;  
+unsigned long debounceDelay = 50;  
+
+void setup() 
+{
+  Serial.begin(9600);
+  pinMode(b1,INPUT); 
+  pinMode(b2,INPUT);
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.print(" 0 sec");
+}
+
+void loop() 
+{
+  	int reading1 = digitalRead(b1);
+  	if (reading1 != lastButton1State)
+  	{
+    	lastDebounceTime = millis(); // Reset the debouncing timer
+  	}
+ 	if ((millis() - lastDebounceTime) > debounceDelay) // Check if state change has lasted for longer time than debounce delay
+  	{
+    	if (reading1 != buttonState) 
+    	{
+      		buttonState = reading1;
+      		if (buttonState == HIGH) // Only shift if button is pressed
+      		{
+      			if (op==1 ||  op==2)
+                {
+                  op=0;
+              	  lcd.setCursor(0,1);
+                  lcd.print(" Stop   "); //Stop the timer
+                  delay(1000);
+            	}
+      			else
+      			if (op==0)
+                {
+                  op=1;
+                  lcd.setCursor(0,1);
+                  lcd.print(" Start  "); //Start the timer
+                  delay(1000);
+                }
+    		}
+     	}
+    }
+  	
+   	int reading2 = digitalRead(b2);
+  	if (reading2 != lastButton2State)
+  	{
+    	lastDebounceTime = millis(); // Reset the debouncing timer
+  	}
+ 	if ((millis() - lastDebounceTime) > debounceDelay) // Check if state change has lasted for longer time than debounce delay
+  	{
+    	if (reading2 != buttonState) 
+    	{
+      		buttonState = reading2;
+      		if (buttonState == HIGH) // Only shift if button is pressed
+      		{
+      			if (op==1)
+      			{
+        			op=2;
+        			lcd.setCursor(0,1);
+        			lcd.print(" Paused "); //Pause the timer
+                  	delay(1000);
+      			}
+      			else
+      			if (op==2)
+        			op=1;
+            }
+        }
+    }
+   	if (op==1)
+    {
+      lcd.clear();
+      s++;//count second
+      if (s==60)
+      {
+        m++;//count minute
+        s=0;//reset second
+      }
+      if (m<1)//print only sec
+      {
+        lcd.print(" ");
+        lcd.print(s);
+      	lcd.print(" sec");
+      }
+      else
+      if (m>0)//print min and sec
+      {
+        lcd.print(" ");
+        lcd.print(m);
+      	lcd.print(" min ");
+        lcd.print(s);
+      	lcd.print(" sec");
+        
+      }
+      //output to serial to confirm LCD output
+      Serial.print("S=");
+      Serial.print(s);
+      Serial.print(" M=");
+      Serial.println(m);
+        
+    }
+  	if (op==0)
+    {
+      //reset
+      s=0;
+      m=0;
+      lcd.clear();
+  	  lcd.print(" 0 sec "); 
+    }
+ //reset lastButtonstates for debouncing
+ lastButton1State = reading1;
+ lastButton2State = reading2;
+ delay(1000);//delay 1 sec
+  
+}
